@@ -1,0 +1,3 @@
+[submodule "airbus-fbw-bench"]
+	path = airbus-fbw-bench
+	url = https://github.com/aguther/airbus-fbw-bench
