@@ -18,9 +18,14 @@ fn main() {
                 std::fs::read_dir(model)
                     .unwrap()
                     .map(|d| d.unwrap().path().as_path().to_str().unwrap().to_owned())
-                    .filter(|f| f.ends_with(".cpp")),
+                    .filter(|f| f.ends_with(".cpp"))
+                    .map(|f| {
+                        println!("cargo:rerun-if-changed={}", f);
+                        f
+                    }),
             )
-            .cpp(true);
+            .cpp(true)
+            .cpp_link_stdlib(None);
 
         if wasm {
             build
