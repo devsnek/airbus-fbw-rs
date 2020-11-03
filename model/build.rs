@@ -1,4 +1,5 @@
 fn main() {
+    let model = "../airbus-fly-by-wire-wasm/src/model";
     let msfs_sdk = std::env::var("MSFS_SDK").unwrap_or_else(calculate_msfs_sdk_path);
     println!("Found MSFS SDK: {:?}", msfs_sdk);
 
@@ -12,9 +13,9 @@ fn main() {
 
         let mut build = cc::Build::new();
         build
-            .include("./airbus-fbw-bench/src-model/src")
+            .include(model)
             .files(
-                std::fs::read_dir("./airbus-fbw-bench/src-model/src")
+                std::fs::read_dir(model)
                     .unwrap()
                     .map(|d| d.unwrap().path().as_path().to_str().unwrap().to_owned())
                     .filter(|f| f.ends_with(".cpp")),
@@ -34,7 +35,8 @@ fn main() {
     {
         println!("cargo:rerun-if-changed=src/wrapper.hpp");
         let mut build = bindgen::Builder::default()
-            .clang_arg("-I./airbus-fbw-bench/src-model/src")
+            .clang_arg(format!("-I{}", model))
+            .clang_arg("-xc++")
             .header("./src/wrapper.hpp")
             .whitelist_type("fbwModelClass")
             .parse_callbacks(Box::new(bindgen::CargoCallbacks))
@@ -43,11 +45,7 @@ fn main() {
         if wasm {
             build = build
                 .clang_arg(format!("--sysroot={}/WASM/wasi-sysroot", msfs_sdk))
-                .clang_arg("-fvisibility=default")
-                // remove default include paths and then add back the wasi include path
-                // because bindgen+libclang is doing something very wrong.
-                .clang_arg("-nostdinc++")
-                .clang_arg(format!("-I{}/WASM/wasi-sysroot/include/c++/v1", msfs_sdk));
+                .clang_arg("-fvisibility=default");
         }
 
         build
