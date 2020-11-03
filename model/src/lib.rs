@@ -10,11 +10,11 @@ mod sys {
 
 /// Fly-by-wire Model
 #[derive(Debug)]
-pub struct FBW(sys::fbwModelClass);
+pub struct FBW(sys::FlyByWireModelClass);
 
 impl Default for FBW {
     fn default() -> Self {
-        FBW(unsafe { sys::fbwModelClass::new() })
+        FBW(unsafe { sys::FlyByWireModelClass::new() })
     }
 }
 
@@ -27,13 +27,13 @@ impl FBW {
     }
 
     /// Access the input data for writing
-    pub fn input(&mut self) -> &mut sys::ExternalInputs_fbw_T {
-        &mut self.0.fbw_U
+    pub fn input(&mut self) -> &mut sys::fbw_input {
+        &mut self.0.FlyByWire_U.in_
     }
 
     /// Access the output data for reading
-    pub fn output(&mut self) -> &sys::ExternalOutputs_fbw_T {
-        &self.0.fbw_Y
+    pub fn output(&mut self) -> &sys::fbw_output {
+        &self.0.FlyByWire_Y.out
     }
 }
 
@@ -53,9 +53,9 @@ fn test() {
     let mut fbw = FBW::default();
     {
         let input = fbw.input();
-        input.in_sim_simrawdata_nz_g = -1.0;
-        input.in_sim_simrawdata_Theta_deg = 1.0;
-        input.in_sim_simrawdata_Phi_deg = 24.0;
+        input.data.nz_g = -1.0;
+        input.data.Theta_deg = 1.0;
+        input.data.Phi_deg = 24.0;
     }
     fbw.step();
     println!("{:#?}", fbw);

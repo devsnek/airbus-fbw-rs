@@ -76,9 +76,9 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
                     model.step();
 
                     let output = OutputData {
-                        elevator: model.output().out_sim_simrawoutput_eta_pos,
-                        elevator_trim: model.output().out_sim_simrawoutput_eta_pos,
-                        ailerons: model.output().out_sim_simrawoutput_xi_pos,
+                        elevator: model.output().sim.raw.output.eta_pos,
+                        elevator_trim: model.output().sim.raw.output.iH_deg,
+                        ailerons: model.output().sim.raw.output.xi_pos,
                     };
 
                     sim.set_data_on_sim_object(SIMCONNECT_OBJECT_ID_USER, &output)?;
@@ -90,10 +90,10 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
                     let map = |n| (n / 13484) as f64;
                     match event.uEventID {
                         0 => {
-                            model.input().in_sim_simrawinput_delta_eta_pos = map(event.dwData);
+                            model.input().input.delta_eta_pos = map(event.dwData);
                         }
                         1 => {
-                            model.input().in_sim_simrawinput_delta_xi_pos = map(event.dwData);
+                            model.input().input.delta_xi_pos = map(event.dwData);
                         }
                         _ => {}
                     }
@@ -101,15 +101,15 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
                 SimConnectRecv::SimObjectData(event) => {
                     let data = event.into::<SimData>(&sim).unwrap();
                     let i = model.input();
-                    i.in_sim_simrawdata_nz_g = data.g_force;
-                    i.in_sim_simrawdata_Theta_deg = data.plane_pitch_degrees;
-                    i.in_sim_simrawdata_Phi_deg = data.plane_bank_degrees;
-                    i.in_sim_simrawdata_Vk_kt = data.indicated_airspeed;
-                    i.in_sim_simrawdata_radio_height_ft = data.radio_height;
-                    i.in_sim_simrawdata_CG_percent_MAC = data.cg;
-                    i.in_sim_simrawdata_qk_rad_s = data.world_rotation_velocity.x;
-                    i.in_sim_simrawdata_rk_rad_s = data.world_rotation_velocity.y;
-                    i.in_sim_simrawdata_pk_rad_s = data.world_rotation_velocity.z;
+                    i.data.nz_g = data.g_force;
+                    i.data.Theta_deg = data.plane_pitch_degrees;
+                    i.data.Phi_deg = data.plane_bank_degrees;
+                    i.data.Vk_kt = data.indicated_airspeed;
+                    i.data.radio_height_ft = data.radio_height;
+                    i.data.CG_percent_MAC = data.cg;
+                    i.data.qk_rad_s = data.world_rotation_velocity.x;
+                    i.data.rk_rad_s = data.world_rotation_velocity.y;
+                    i.data.pk_rad_s = data.world_rotation_velocity.z;
                 }
                 _ => {}
             },

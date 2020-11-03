@@ -38,7 +38,7 @@ fn main() {
             .clang_arg(format!("-I{}", model))
             .clang_arg("-xc++")
             .header("./src/wrapper.hpp")
-            .whitelist_type("fbwModelClass")
+            .whitelist_type("FlyByWireModelClass")
             .parse_callbacks(Box::new(bindgen::CargoCallbacks))
             .impl_debug(true);
 
