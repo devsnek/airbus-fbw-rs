@@ -87,7 +87,7 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
             },
             MSFSEvent::SimConnect(recv) => match recv {
                 SimConnectRecv::Event(event) => {
-                    let map = |n| (n / 13484) as f64;
+                    let map = |n| (n / 16384) as f64;
                     match event.uEventID {
                         0 => {
                             model.input().input.delta_eta_pos = map(event.dwData);
