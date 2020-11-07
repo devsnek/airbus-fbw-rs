@@ -1,4 +1,4 @@
-SOURCES := $(wildcard ./fbw/**/*) $(wildcard ./model/**/*)
+SOURCES := $(wildcard ./fbw/**/*) $(wildcard ./model/**/*) $(wildcard ./airbus-fly-by-wire-wasm/src/model/**/*)
 BUILD ?= debug
 CARGO_FLAGS = --target wasm32-wasi
 WASM_OPT = : # null command
