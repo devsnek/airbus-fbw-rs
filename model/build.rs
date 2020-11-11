@@ -1,6 +1,6 @@
 fn main() {
     let model = "../airbus-fly-by-wire-wasm/src/model";
-    let msfs_sdk = std::env::var("MSFS_SDK").unwrap_or_else(calculate_msfs_sdk_path);
+    let msfs_sdk = msfs_sdk::calculate_msfs_sdk_path().unwrap();
     println!("Found MSFS SDK: {:?}", msfs_sdk);
 
     let wasm = std::env::var("TARGET") == Ok("wasm32-wasi".to_string());
@@ -61,13 +61,4 @@ fn main() {
             )
             .unwrap();
     }
-}
-
-fn calculate_msfs_sdk_path(_: std::env::VarError) -> String {
-    for p in ["/mnt/c/MSFS SDK", r"C:\MSFS SDK"].iter() {
-        if std::path::Path::new(p).exists() {
-            return p.to_string();
-        }
-    }
-    panic!("Could not locate MSFS SDK. Make sure you have it installed or try setting the MSFS_SDK env var.");
 }

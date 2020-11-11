@@ -15,18 +15,39 @@ struct SimData {
     #[name = "PLANE BANK DEGREES"]
     #[unit = "DEGREE"]
     plane_bank_degrees: f64,
-    #[name = "STRUCT WORLD ROTATION VELOCITY"]
+    #[name = "STRUCT BODY ROTATION VELOCITY"]
     #[unit = "STRUCT"]
-    world_rotation_velocity: DataXYZ,
+    body_rotation_velocity: DataXYZ,
     #[name = "STRUCT BODY ROTATION ACCELERATION"]
     #[unit = "STRUCT"]
     body_rotation_acceleration: DataXYZ,
     #[name = "ELEVATOR TRIM POSITION"]
     #[unit = "DEGREE"]
     elevator_trim: f64,
+    #[name = "RUDDER TRIM PCT"]
+    #[unit = "PCT OVER 100"]
+    rudder_trim: f64,
+    #[name = "INCIDENCE ALPHA"]
+    #[unit = "DEGREE"]
+    incidence_alpha: f64,
+    #[name = "INCIDENCE BETA"]
+    #[unit = "DEGREE"]
+    incidence_beta: f64,
     #[name = "AIRSPEED INDICATED"]
     #[unit = "KNOTS"]
     indicated_airspeed: f64,
+    #[name = "AIRSPEED TRUE"]
+    #[unit = "KNOTS"]
+    true_airspeed: f64,
+    #[name = "AIRSPEED MACH"]
+    #[unit = "KNOTS"]
+    mach_airspeed: f64,
+    #[name = "PLANE ALTITUDE"]
+    #[unit = "FEET"]
+    plane_altitude: f64,
+    #[name = "INDICATED ALTITUDE"]
+    #[unit = "FEET"]
+    indicated_altitude: f64,
     #[name = "RADIO HEIGHT"]
     #[unit = "FEET"]
     radio_height: f64,
@@ -36,6 +57,9 @@ struct SimData {
     #[name = "FLAPS HANDLE INDEX"]
     #[unit = "NUMBER"]
     flaps_handle_index: f64,
+    #[name = "AUTOPILOT MASTER"]
+    #[unit = "BOOL"]
+    autopilot_master: bool,
 }
 
 #[data_definition]
@@ -117,11 +141,11 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
                         },
                     )?;
 
-                    if model.output().sim.raw.output.iH_deg_should_write == 1.0 {
+                    if model.output().sim.raw.output.eta_trim_deg_should_write == 1 {
                         sim.set_data_on_sim_object(
                             SIMCONNECT_OBJECT_ID_USER,
                             &OutputDataTrim {
-                                elevator_trim: model.output().sim.raw.output.iH_deg,
+                                elevator_trim: model.output().sim.raw.output.eta_trim_deg,
                             },
                         )?;
                     }
@@ -152,17 +176,26 @@ async fn fbw(mut gauge: msfs::Gauge) -> Result<(), Box<dyn std::error::Error>> {
                             i.data.nz_g = data.g_force;
                             i.data.Theta_deg = data.plane_pitch_degrees;
                             i.data.Phi_deg = data.plane_bank_degrees;
-                            i.data.qk_rad_s = data.world_rotation_velocity.x;
-                            i.data.rk_rad_s = data.world_rotation_velocity.y;
-                            i.data.pk_rad_s = data.world_rotation_velocity.z;
+                            i.data.q_rad_s = data.body_rotation_velocity.x;
+                            i.data.r_rad_s = data.body_rotation_velocity.y;
+                            i.data.p_rad_s = data.body_rotation_velocity.z;
                             i.data.q_dot_rad_s2 = data.body_rotation_acceleration.x;
                             i.data.r_dot_rad_s2 = data.body_rotation_acceleration.y;
                             i.data.p_dot_rad_s2 = data.body_rotation_acceleration.z;
-                            i.data.iH_deg = data.elevator_trim;
-                            i.data.Vk_kt = data.indicated_airspeed;
-                            i.data.radio_height_ft = data.radio_height;
+                            i.data.eta_trim_deg = data.elevator_trim;
+                            i.data.zeta_trim_pos = data.rudder_trim;
+                            i.data.alpha_deg = data.incidence_alpha;
+                            i.data.beta_deg = data.incidence_beta;
+                            i.data.V_ias_kn = data.indicated_airspeed;
+                            i.data.V_tas_kn = data.true_airspeed;
+                            i.data.V_mach = data.mach_airspeed;
+                            i.data.H_ft = data.plane_altitude;
+                            i.data.H_ind_ft = data.indicated_altitude;
+                            i.data.H_radio_ft = data.radio_height;
                             i.data.CG_percent_MAC = data.cg;
                             i.data.flaps_handle_index = data.flaps_handle_index;
+                            i.data.autopilot_master_on =
+                                if data.autopilot_master { 1.0 } else { 0.0 };
                         }
                         1 => {
                             let data = event.into::<GearPositions>(&sim).unwrap();
